@@ -1,0 +1,10 @@
+{% extends "rentals/base.html" %}{% block content %}
+<div class="card p-4 col-md-6 mx-auto"><h4>Pay for {{ b.booking_ref }}</h4>
+<p class="text-muted">{{ b.product.name }} · {{ b.start_date }} to {{ b.end_date }} ({{ b.rental_days }} days)</p>
+<table class="table"><tr><td>Rent</td><td class="text-end">₹{{ b.rental_total }}</td></tr>
+<tr><td>Security deposit</td><td class="text-end">₹{{ b.deposit }}</td></tr>
+<tr class="fw-bold"><td>Total</td><td class="text-end">₹{{ b.grand_total }}</td></tr></table>
+<div class="alert alert-warning small">Prototype: this is a mock payment. No money moves and no card details are collected. Razorpay is the next phase.</div>
+{% if b.status == 'PENDING' or b.status == 'CONFIRMED' %}<form method="post">{% csrf_token %}<button class="btn btn-rent w-100">Pay ₹{{ b.grand_total }} (mock)</button></form>
+{% else %}<p>This booking is {{ b.get_status_display }}.</p>{% endif %}</div>
+{% endblock %}

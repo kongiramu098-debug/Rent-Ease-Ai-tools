@@ -1,0 +1,9 @@
+{% extends "rentals/base.html" %}{% block content %}<h4 class="mb-3">My bookings</h4>
+{% for r in rows %}<div class="card p-3 mb-3"><div class="d-flex justify-content-between flex-wrap">
+<div><strong>{{ r.b.booking_ref }}</strong> · {{ r.b.product.name }}<br><span class="text-muted small">{{ r.b.start_date }} to {{ r.b.end_date }} · ₹{{ r.b.grand_total }} incl. deposit · {{ r.b.product.shop.name }}</span></div>
+<span class="badge {% if r.b.status == 'CANCELLED' %}bg-secondary{% else %}bg-primary{% endif %} align-self-start">{{ r.b.get_status_display }}</span></div>
+<ul class="steps my-3">{% for s in r.steps %}<li class="{% if s.done %}done{% endif %}">{{ s.label }}</li>{% endfor %}</ul>
+<div class="d-flex gap-2">{% if r.can_pay %}<a class="btn btn-rent btn-sm" href="{% url 'payment' r.b.pk %}">Pay now</a>{% endif %}
+{% if r.can_cancel %}<form method="post" action="{% url 'cancel' r.b.pk %}">{% csrf_token %}<button class="btn btn-outline-danger btn-sm">Cancel booking</button></form>{% endif %}</div></div>
+{% empty %}<p class="text-muted">No bookings yet. <a href="{% url 'products' %}">Browse devices</a> to make your first one.</p>{% endfor %}
+{% endblock %}

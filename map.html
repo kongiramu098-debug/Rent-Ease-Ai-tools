@@ -1,0 +1,29 @@
+{% extends "rentals/base.html" %}
+{% block head %}<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">{% endblock %}
+{% block content %}<h4>Nearby rental shops</h4>
+<div class="row g-2 mb-3"><div class="col-md-4"><input id="city" class="form-control" placeholder="Search by city"></div>
+<div class="col-md-3"><select id="cat" class="form-select"><option value="">Any device</option><option>Laptops</option><option>Smartphones</option><option>Cameras</option><option>Tablets</option><option>Projectors</option><option>Speakers</option><option>Gaming consoles</option><option>Computer accessories</option></select></div>
+<div class="col-md-2"><button id="go" class="btn btn-rent w-100">Search</button></div>
+<div class="col-md-3"><button id="loc" class="btn btn-outline-primary w-100">Use my location</button></div></div>
+<div id="map"></div><div id="list" class="list-group mt-3"></div>
+{% endblock %}
+{% block scripts %}<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>
+const map=L.map('map').setView([12.96,77.62],11);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+let markers=[],me=null;
+async function load(){const p=new URLSearchParams({city:city.value,category:cat.value});
+if(me){p.set('lat',me[0]);p.set('lng',me[1]);}
+const d=await (await fetch('/api/shops/nearby/?'+p)).json();
+markers.forEach(m=>m.remove());markers=[];list.innerHTML='';
+if(!d.shops.length){list.innerHTML='<div class="list-group-item text-muted">No shops match. Try another city or device.</div>';return;}
+d.shops.forEach(s=>{markers.push(L.marker([s.lat,s.lng]).addTo(map).bindPopup(`<b>${s.name}</b><br>${s.address}`));
+const a=document.createElement('a');a.className='list-group-item';
+a.href=`https://www.openstreetmap.org/directions?to=${s.lat},${s.lng}`;a.target='_blank';
+a.textContent=`${s.name} · ${s.address}, ${s.city}${s.distance_km!=null?' · '+s.distance_km+' km':''} · ${s.categories.join(', ')} (get directions)`;list.appendChild(a);});
+map.fitBounds(markers.map(m=>m.getLatLng()),{padding:[30,30],maxZoom:14});}
+go.onclick=load;
+loc.onclick=()=>navigator.geolocation?navigator.geolocation.getCurrentPosition(
+ pos=>{me=[pos.coords.latitude,pos.coords.longitude];L.circleMarker(me,{radius:8}).addTo(map).bindPopup('You are here');load();},
+ ()=>alert('Location permission denied. Search by city instead.')):alert('Location is not supported in this browser.');
+load();
+</script>{% endblock %}

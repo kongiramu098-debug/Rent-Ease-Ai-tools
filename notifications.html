@@ -1,0 +1,2 @@
+{% extends "rentals/base.html" %}{% block content %}<h4>Alerts</h4>
+<ul class="list-group">{% for n in items %}<li class="list-group-item">{{ n.message }} <span class="text-muted small">{{ n.created_at|timesince }} ago</span></li>{% empty %}<li class="list-group-item text-muted">Nothing yet. Booking and payment updates show up here.</li>{% endfor %}</ul>{% endblock %}

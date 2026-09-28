@@ -1,0 +1,18 @@
+{% extends "rentals/base.html" %}{% block content %}
+<div class="col-md-8 mx-auto"><h4>Rental assistant</h4>
+<p class="text-muted small">Try: "I need a laptop for three days under ₹500 per day". Prices and availability come from the database. Booking always happens on the product page, after you confirm.</p>
+<div id="chatlog" class="card p-3 mb-2"><div class="msg bot">Hi! What device do you need, for how long, and what's your daily budget?</div></div>
+<form id="f" class="d-flex gap-2">{% csrf_token %}<input id="t" class="form-control" maxlength="500" placeholder="Describe what you need" autocomplete="off"><button class="btn btn-rent">Send</button></form></div>
+{% endblock %}
+{% block scripts %}<script>
+const log=document.getElementById('chatlog'),csrf=document.querySelector('[name=csrfmiddlewaretoken]').value;
+function add(cls,html){const d=document.createElement('div');d.className='msg '+cls;d.innerHTML=html;log.appendChild(d);log.scrollTop=log.scrollHeight;}
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.getElementById('f').addEventListener('submit',async e=>{e.preventDefault();
+const t=document.getElementById('t'),m=t.value.trim();if(!m)return;add('me',esc(m));t.value='';
+try{const r=await fetch('/api/ai/chat/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrf},body:JSON.stringify({message:m})});
+const d=await r.json();if(!r.ok){add('bot',esc(d.error||'Something went wrong.'));return;}
+let h=esc(d.reply);d.products.forEach(p=>{h+=`<div class="card p-2 mt-2"><strong>${esc(p.name)}</strong><span class="small text-muted">${esc(p.shop)}, ${esc(p.city)}</span>
+<span>₹${p.daily_price}/day · ${p.days} day(s) = ₹${p.total} + ₹${p.deposit} deposit</span><a href="${p.url}">Review and book</a></div>`});add('bot',h);
+}catch(err){add('bot','The assistant is unreachable. Try again in a moment.');}});
+</script>{% endblock %}

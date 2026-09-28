@@ -1,0 +1,11 @@
+{% extends "rentals/base.html" %}{% block content %}
+<section class="hero rounded-4 px-4"><div class="col-lg-7">
+<h1 class="display-5 fw-bold">Rent the device. Skip the purchase.</h1>
+<p class="lead text-muted">Laptops, cameras, projectors and more from rental shops near you, by the day.</p>
+<form action="{% url 'products' %}" class="d-flex gap-2 mb-3"><input name="q" class="form-control form-control-lg" placeholder="Search laptops, cameras, projectors">
+<button class="btn btn-rent btn-lg">Search</button></form>
+<a href="{% url 'chat' %}" class="btn btn-outline-primary">Or tell the assistant what you need</a></div></section>
+<h5 class="mt-4">Categories</h5><div class="d-flex flex-wrap gap-2 mb-4">
+{% for c in categories %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'products' %}?category={{ c|urlencode }}">{{ c }}</a>{% endfor %}</div>
+<h5>Available now</h5><div class="row g-3">{% for p in featured %}{% include "rentals/_card.html" %}{% empty %}<p class="text-muted">No products yet. Run <code>python manage.py seed</code>.</p>{% endfor %}</div>
+{% endblock %}
